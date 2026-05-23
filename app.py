@@ -61,8 +61,89 @@ language_code = language_map[
     selected_language
 ]
 
-# Generate button
-if st.button("Generate Video"):
+# Audio speed
+audio_speed = st.slider(
+    "Audio Speed",
+    min_value=0.5,
+    max_value=2.0,
+    value=1.10,
+    step=0.1
+)
+
+# Buttons
+col1, col2 = st.columns(2)
+
+generate_audio_btn = col1.button(
+    "🎤 Generate Audio"
+)
+
+generate_video_btn = col2.button(
+    "🎬 Generate Video"
+)
+
+# -----------------------------------
+# Generate Audio Only
+# -----------------------------------
+
+if generate_audio_btn:
+
+    if not text.strip():
+
+        st.warning(
+            "Please enter text"
+        )
+
+        st.stop()
+
+    try:
+
+        st.info(
+            "Generating audio..."
+        )
+
+        audio_path = (
+            f"outputs/temp/"
+            f"{generate_filename('mp3')}"
+        )
+
+        generate_tts(
+            text=text,
+            language=language_code,
+            output_path=audio_path,
+            speed=audio_speed
+        )
+
+        st.success(
+            "Audio generated successfully ✅"
+        )
+
+        # Play audio
+        st.audio(audio_path)
+
+        # Download audio
+        with open(
+            audio_path,
+            "rb"
+        ) as audio_file:
+
+            st.download_button(
+                label="⬇ Download Audio",
+                data=audio_file,
+                file_name="ai_audio.mp3",
+                mime="audio/mp3"
+            )
+
+    except Exception as error:
+
+        st.error(
+            f"Error: {str(error)}"
+        )
+
+# -----------------------------------
+# Generate Video
+# -----------------------------------
+
+if generate_video_btn:
 
     # Validation
     if not uploaded_video:
@@ -130,7 +211,8 @@ if st.button("Generate Video"):
         generate_tts(
             text=text,
             language=language_code,
-            output_path=audio_path
+            output_path=audio_path,
+            speed=audio_speed
         )
 
         # -----------------------------------
@@ -155,7 +237,7 @@ if st.button("Generate Video"):
         )
 
         # -----------------------------------
-        # Generate ASS Subtitles
+        # Generate Subtitles
         # -----------------------------------
 
         progress_text.text(
@@ -212,7 +294,7 @@ if st.button("Generate Video"):
         # Preview video
         st.video(final_video_path)
 
-        # Download button
+        # Download video
         with open(
             final_video_path,
             "rb"
