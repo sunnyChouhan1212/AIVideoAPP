@@ -10,11 +10,11 @@ from services.tts_service import (
 
 from services.video_service import (
     replace_video_audio,
-    burn_subtitles
+    burn_ass_subtitles
 )
 
-from services.subtitle_service import (
-    generate_srt_from_audio
+from services.ass_subtitle_service import (
+    generate_ass_subtitles
 )
 
 from utils.helpers import (
@@ -34,12 +34,6 @@ st.set_page_config(
 
 # Title
 st.title("🎬 AI Video Generator")
-
-# Info
-st.info(
-    "First subtitle generation may take "
-    "1-2 minutes because AI model downloads."
-)
 
 # Upload video
 uploaded_video = st.file_uploader(
@@ -161,7 +155,7 @@ if st.button("Generate Video"):
         )
 
         # -----------------------------------
-        # Generate Subtitles
+        # Generate ASS Subtitles
         # -----------------------------------
 
         progress_text.text(
@@ -172,11 +166,11 @@ if st.button("Generate Video"):
 
         subtitle_path = (
             f"outputs/temp/"
-            f"{generate_filename('srt')}"
+            f"{generate_filename('ass')}"
         )
 
-        generate_srt_from_audio(
-            audio_path=audio_path,
+        generate_ass_subtitles(
+            text=text,
             output_path=subtitle_path
         )
 
@@ -195,7 +189,7 @@ if st.button("Generate Video"):
             f"{generate_filename('mp4')}"
         )
 
-        burn_subtitles(
+        burn_ass_subtitles(
             input_video=temp_video_path,
             subtitle_file=subtitle_path,
             output_video=final_video_path

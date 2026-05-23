@@ -1,5 +1,6 @@
 import subprocess
 
+
 def replace_video_audio(
     input_video,
     input_audio,
@@ -34,7 +35,7 @@ def replace_video_audio(
     return output_video
 
 
-def burn_subtitles(
+def burn_ass_subtitles(
     input_video,
     subtitle_file,
     output_video
@@ -45,7 +46,9 @@ def burn_subtitles(
         "-y",
         "-i", input_video,
         "-vf",
-        f"subtitles={subtitle_file}",
+        f"ass={subtitle_file}",
+        "-c:a",
+        "copy",
         output_video
     ]
 
