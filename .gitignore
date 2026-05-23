@@ -1,0 +1,30 @@
+# Virtual Environment
+venv/
+
+# Python
+__pycache__/
+*.pyc
+
+# Streamlit
+.streamlit/
+
+# Outputs
+outputs/temp/
+outputs/final_videos/
+
+# Media
+*.mp3
+*.mp4
+*.wav
+*.srt
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Environment
+.env
