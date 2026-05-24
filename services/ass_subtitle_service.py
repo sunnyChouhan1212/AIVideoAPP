@@ -1,3 +1,7 @@
+from utils.subtitle_styles import (
+    SUBTITLE_STYLES
+)
+
 def format_ass_time(seconds):
 
     hours = int(seconds // 3600)
@@ -59,7 +63,8 @@ def generate_karaoke_line(
 
 def generate_ass_subtitles(
     text,
-    output_path
+    output_path,
+    subtitle_theme="TikTok"
 ):
 
     # Split text into words
@@ -75,18 +80,18 @@ def generate_ass_subtitles(
     word_duration = 0.6
 
     ass_content = """
-[Script Info]
-Title: Karaoke Viral Captions
-ScriptType: v4.00+
+    [Script Info]
+    Title: Karaoke Viral Captions
+    ScriptType: v4.00+
 
-[V4+ Styles]
-Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+    [V4+ Styles]
+    Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
 
-Style: Default,Noto Sans Devanagari,30,&H00FFFFFF,&H0000FFFF,&H00000000,&H64000000,-1,0,0,0,100,100,0,0,1,3,1,2,20,20,60,1
+    {SUBTITLE_STYLES[subtitle_theme]}
 
-[Events]
-Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
-"""
+    [Events]
+    Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+    """
 
     current_time = 0
 

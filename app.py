@@ -5,7 +5,8 @@ os.environ["HF_HUB_DISABLE_SYMLINKS_WARNING"] = "1"
 import streamlit as st
 
 from services.tts_service import (
-    generate_tts
+    generate_tts,
+    EDGE_VOICES
 )
 
 from services.video_service import (
@@ -17,6 +18,10 @@ from services.ass_subtitle_service import (
     generate_ass_subtitles
 )
 
+from services.script_service import (
+    generate_viral_script
+)
+
 from utils.helpers import (
     generate_filename,
     ensure_directories
@@ -25,14 +30,20 @@ from utils.helpers import (
 # Create folders
 ensure_directories()
 
-# Page config
+# -----------------------------------
+# Page Config
+# -----------------------------------
+
 st.set_page_config(
     page_title="AI Video Generator",
     page_icon="🎬",
     layout="centered"
 )
 
+# -----------------------------------
 # Title
+# -----------------------------------
+
 st.title("🎬 AI Video Generator")
 
 # -----------------------------------
@@ -59,10 +70,11 @@ if video_source == "Upload Video":
         type=["mp4", "mov", "avi"]
     )
 
-# Use existing gameplay
+# Use gameplay video
 else:
 
     gameplay_options = {
+
         "Minecraft":
         "assets/gameplays/minecraft.mp4",
 
@@ -92,14 +104,6 @@ else:
     )
 
 # -----------------------------------
-# Text Input
-# -----------------------------------
-
-text = st.text_area(
-    "Enter speech text"
-)
-
-# -----------------------------------
 # Language Selection
 # -----------------------------------
 
@@ -118,15 +122,77 @@ language_code = language_map[
 ]
 
 # -----------------------------------
-# Audio Speed
+# AI Script Generator
 # -----------------------------------
 
-audio_speed = st.slider(
-    "Audio Speed",
-    min_value=0.5,
-    max_value=2.0,
-    value=1.0,
-    step=0.1
+st.subheader(
+    "🤖 AI Script Generator"
+)
+
+topic = st.text_input(
+    "Enter Video Topic"
+)
+
+script_style = st.selectbox(
+    "Script Style",
+    [
+        "Brainrot",
+        "Motivation",
+        "Scary",
+        "Facts",
+        "Storytelling"
+    ]
+)
+
+if st.button("✨ Generate AI Script"):
+
+    if not topic.strip():
+
+        st.warning(
+            "Please enter topic"
+        )
+
+    else:
+
+        with st.spinner(
+            "Generating viral script..."
+        ):
+
+            try:
+
+                generated_script = (
+                    generate_viral_script(
+                        topic=topic,
+                        language=selected_language,
+                        style=script_style
+                    )
+                )
+
+                st.session_state[
+                    "generated_script"
+                ] = generated_script
+
+                st.success(
+                    "Script generated ✅"
+                )
+
+            except Exception as error:
+
+                st.error(
+                    str(error)
+                )
+
+# -----------------------------------
+# Speech Text
+# -----------------------------------
+
+text = st.text_area(
+    "Enter speech text",
+    value=st.session_state.get(
+        "generated_script",
+        ""
+    ),
+    height=220
 )
 
 # -----------------------------------
@@ -143,12 +209,8 @@ tts_provider = st.selectbox(
 
 edge_voice = None
 
-# Edge voice selection
+# Edge voices
 if tts_provider == "edge":
-
-    from services.tts_service import (
-        EDGE_VOICES
-    )
 
     selected_voice = st.selectbox(
         "Select Edge Voice",
@@ -158,6 +220,32 @@ if tts_provider == "edge":
     edge_voice = EDGE_VOICES[
         selected_voice
     ]
+
+# -----------------------------------
+# Audio Speed
+# -----------------------------------
+
+audio_speed = st.slider(
+    "Audio Speed",
+    min_value=0.5,
+    max_value=2.0,
+    value=1.0,
+    step=0.1
+)
+
+# -----------------------------------
+# Subtitle Theme
+# -----------------------------------
+
+subtitle_theme = st.selectbox(
+    "Subtitle Theme",
+    [
+        "TikTok",
+        "Gaming",
+        "Meme",
+        "Minimal"
+    ]
+)
 
 # -----------------------------------
 # Buttons
@@ -211,10 +299,8 @@ if generate_audio_btn:
             "Audio generated successfully ✅"
         )
 
-        # Play audio
         st.audio(audio_path)
 
-        # Download audio
         with open(
             audio_path,
             "rb"
@@ -259,7 +345,7 @@ if generate_video_btn:
 
         st.stop()
 
-    # Progress UI
+    # Progress
     progress_text = st.empty()
 
     progress_bar = st.progress(0)
@@ -281,7 +367,7 @@ if generate_video_btn:
             f"{generate_filename('mp4')}"
         )
 
-        # Save uploaded video
+        # Upload video
         if uploaded_video:
 
             with open(
@@ -293,7 +379,7 @@ if generate_video_btn:
                     uploaded_video.read()
                 )
 
-        # Copy gameplay video
+        # Gameplay video
         else:
 
             with open(
@@ -372,7 +458,8 @@ if generate_video_btn:
 
         generate_ass_subtitles(
             text=text,
-            output_path=subtitle_path
+            output_path=subtitle_path,
+            subtitle_theme=subtitle_theme
         )
 
         # -----------------------------------
@@ -397,7 +484,7 @@ if generate_video_btn:
         )
 
         # -----------------------------------
-        # Completed
+        # Complete
         # -----------------------------------
 
         progress_text.text(
@@ -410,10 +497,8 @@ if generate_video_btn:
             "Video generated successfully ✅"
         )
 
-        # Preview video
         st.video(final_video_path)
 
-        # Download video
         with open(
             final_video_path,
             "rb"
@@ -431,4 +516,3 @@ if generate_video_btn:
         st.error(
             f"Error: {str(error)}"
         )
-

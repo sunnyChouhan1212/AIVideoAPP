@@ -3,3 +3,6 @@ gtts
 pydub
 ffmpeg-python
 faster-whisper
+edge-tts
+openai
+ python-dotenv
