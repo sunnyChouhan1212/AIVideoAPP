@@ -19,7 +19,8 @@ from services.ass_subtitle_service import (
 )
 
 from services.script_service import (
-    generate_viral_script
+    generate_viral_script,
+    LLM_MODELS
 )
 
 from utils.helpers import (
@@ -45,6 +46,31 @@ st.set_page_config(
 # -----------------------------------
 
 st.title("🎬 AI Video Generator")
+
+# -----------------------------------
+# Sidebar
+# -----------------------------------
+
+st.sidebar.title(
+    "⚙ AI Settings"
+)
+
+# LLM Provider
+selected_provider = st.sidebar.selectbox(
+    "Select LLM Provider",
+    [
+        "OpenAI",
+        "Groq"
+    ]
+)
+
+# Model Selection
+selected_model = st.sidebar.selectbox(
+    "Select Model",
+    LLM_MODELS[
+        selected_provider
+    ]
+)
 
 # -----------------------------------
 # Video Source Selection
@@ -164,7 +190,9 @@ if st.button("✨ Generate AI Script"):
                     generate_viral_script(
                         topic=topic,
                         language=selected_language,
-                        style=script_style
+                        style=script_style,
+                        provider=selected_provider,
+                        model_name=selected_model
                     )
                 )
 

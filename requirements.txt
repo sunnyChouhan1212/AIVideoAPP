@@ -5,4 +5,5 @@ ffmpeg-python
 faster-whisper
 edge-tts
 openai
- python-dotenv
+python-dotenv
+groq

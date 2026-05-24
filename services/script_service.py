@@ -1,24 +1,57 @@
 import os
 
+from dotenv import load_dotenv
+
 from openai import OpenAI
 
-from dotenv import load_dotenv
+from groq import Groq
 
 # Load env
 load_dotenv()
 
-# OpenAI client
-client = OpenAI(
+# OpenAI Client
+openai_client = OpenAI(
     api_key=os.getenv(
         "OPENAI_API_KEY"
     )
 )
 
+# Groq Client
+groq_client = Groq(
+    api_key=os.getenv(
+        "GROQ_API_KEY"
+    )
+)
+
+# -----------------------------------
+# Models
+# -----------------------------------
+
+LLM_MODELS = {
+
+    "OpenAI": [
+        "gpt-4.1-mini",
+        "gpt-4o-mini"
+    ],
+
+    "Groq": [
+        "llama-3.3-70b-versatile",
+        "llama3-8b-8192",
+        "mixtral-8x7b-32768"
+    ]
+}
+
+
+# -----------------------------------
+# Generate Script
+# -----------------------------------
 
 def generate_viral_script(
     topic,
     language="English",
-    style="Brainrot"
+    style="Brainrot",
+    provider="OpenAI",
+    model_name="gpt-4.1-mini"
 ):
 
     prompt = f"""
@@ -42,18 +75,59 @@ Requirements:
 - Easy narration
 """
 
-    response = client.chat.completions.create(
-        model="gpt-4.1-mini",
+    # -----------------------------------
+    # OpenAI
+    # -----------------------------------
 
-        messages=[
-            {
-                "role": "user",
-                "content": prompt
-            }
-        ],
+    if provider == "OpenAI":
 
-        temperature=0.9
-    )
+        response = (
+            openai_client
+            .chat
+            .completions
+            .create(
+                model=model_name,
+
+                messages=[
+                    {
+                        "role": "user",
+                        "content": prompt
+                    }
+                ],
+
+                temperature=0.9
+            )
+        )
+
+    # -----------------------------------
+    # Groq
+    # -----------------------------------
+
+    elif provider == "Groq":
+
+        response = (
+            groq_client
+            .chat
+            .completions
+            .create(
+                model=model_name,
+
+                messages=[
+                    {
+                        "role": "user",
+                        "content": prompt
+                    }
+                ],
+
+                temperature=0.9
+            )
+        )
+
+    else:
+
+        raise Exception(
+            "Invalid provider"
+        )
 
     script = (
         response
