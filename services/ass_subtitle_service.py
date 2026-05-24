@@ -18,7 +18,10 @@ def format_ass_time(seconds):
     )
 
 
-def chunk_words(words, chunk_size=3):
+def chunk_words(
+    words,
+    chunk_size=4
+):
 
     chunks = []
 
@@ -32,11 +35,26 @@ def chunk_words(words, chunk_size=3):
             i:i + chunk_size
         ]
 
-        chunks.append(
-            " ".join(chunk)
-        )
+        chunks.append(chunk)
 
     return chunks
+
+
+def generate_karaoke_line(
+    words,
+    word_duration_cs=60
+):
+
+    karaoke_text = ""
+
+    for word in words:
+
+        karaoke_text += (
+            f"{{\\k{word_duration_cs}}}"
+            f"{word} "
+        )
+
+    return karaoke_text.strip()
 
 
 def generate_ass_subtitles(
@@ -47,47 +65,52 @@ def generate_ass_subtitles(
     # Split text into words
     words = text.split()
 
-    # Create small chunks
+    # Create chunks
     subtitle_chunks = chunk_words(
         words,
-        chunk_size=3
+        chunk_size=4
     )
 
-    # Duration per chunk
-    chunk_duration = 1.2
+    # Timing
+    word_duration = 0.6
 
     ass_content = """
 [Script Info]
-Title: Viral Captions
+Title: Karaoke Viral Captions
 ScriptType: v4.00+
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
 
-Style: Default,Noto Sans Devanagari,28,&H00FFFFFF,&H0000FFFF,&H00000000,&H64000000,-1,0,0,0,100,100,0,0,1,3,1,2,20,20,60,1
+Style: Default,Noto Sans Devanagari,30,&H00FFFFFF,&H0000FFFF,&H00000000,&H64000000,-1,0,0,0,100,100,0,0,1,3,1,2,20,20,60,1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 """
 
-    for index, chunk in enumerate(
-        subtitle_chunks
-    ):
+    current_time = 0
 
-        start_time = (
-            index * chunk_duration
-        )
+    for chunk in subtitle_chunks:
 
-        end_time = (
-            start_time + chunk_duration
+        # Chunk duration
+        chunk_duration = (
+            len(chunk) * word_duration
         )
 
         start_time = format_ass_time(
-            start_time
+            current_time
         )
 
         end_time = format_ass_time(
-            end_time
+            current_time +
+            chunk_duration
+        )
+
+        karaoke_text = (
+            generate_karaoke_line(
+                chunk,
+                word_duration_cs=60
+            )
         )
 
         ass_content += (
@@ -95,8 +118,10 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
             f"{start_time},"
             f"{end_time},"
             f"Default,,0,0,0,,"
-            f"{chunk}\n"
+            f"{karaoke_text}\n"
         )
+
+        current_time += chunk_duration
 
     # Save ASS file
     with open(

@@ -130,6 +130,36 @@ audio_speed = st.slider(
 )
 
 # -----------------------------------
+# TTS Provider
+# -----------------------------------
+
+tts_provider = st.selectbox(
+    "Select TTS Provider",
+    [
+        "gtts",
+        "edge"
+    ]
+)
+
+edge_voice = None
+
+# Edge voice selection
+if tts_provider == "edge":
+
+    from services.tts_service import (
+        EDGE_VOICES
+    )
+
+    selected_voice = st.selectbox(
+        "Select Edge Voice",
+        list(EDGE_VOICES.keys())
+    )
+
+    edge_voice = EDGE_VOICES[
+        selected_voice
+    ]
+
+# -----------------------------------
 # Buttons
 # -----------------------------------
 
@@ -172,7 +202,9 @@ if generate_audio_btn:
             text=text,
             language=language_code,
             output_path=audio_path,
-            speed=audio_speed
+            speed=audio_speed,
+            tts_provider=tts_provider,
+            edge_voice=edge_voice
         )
 
         st.success(
@@ -297,7 +329,9 @@ if generate_video_btn:
             text=text,
             language=language_code,
             output_path=audio_path,
-            speed=audio_speed
+            speed=audio_speed,
+            tts_provider=tts_provider,
+            edge_voice=edge_voice
         )
 
         # -----------------------------------
