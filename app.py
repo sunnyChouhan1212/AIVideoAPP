@@ -35,18 +35,74 @@ st.set_page_config(
 # Title
 st.title("🎬 AI Video Generator")
 
-# Upload video
-uploaded_video = st.file_uploader(
-    "Upload Video",
-    type=["mp4", "mov", "avi"]
+# -----------------------------------
+# Video Source Selection
+# -----------------------------------
+
+video_source = st.radio(
+    "Select Video Source",
+    [
+        "Upload Video",
+        "Use Gameplay Video"
+    ]
 )
 
-# Text input
+uploaded_video = None
+
+selected_gameplay_path = None
+
+# Upload custom video
+if video_source == "Upload Video":
+
+    uploaded_video = st.file_uploader(
+        "Upload Video",
+        type=["mp4", "mov", "avi"]
+    )
+
+# Use existing gameplay
+else:
+
+    gameplay_options = {
+        "Minecraft":
+        "assets/gameplays/minecraft.mp4",
+
+        "Subway Surfers":
+        "assets/gameplays/subway.mp4",
+
+        "GTA":
+        "assets/gameplays/gta.mp4",
+
+        "Satisfying":
+        "assets/gameplays/satisfying.mp4"
+    }
+
+    selected_gameplay = st.selectbox(
+        "Select Gameplay",
+        list(gameplay_options.keys())
+    )
+
+    selected_gameplay_path = (
+        gameplay_options[
+            selected_gameplay
+        ]
+    )
+
+    st.video(
+        selected_gameplay_path
+    )
+
+# -----------------------------------
+# Text Input
+# -----------------------------------
+
 text = st.text_area(
     "Enter speech text"
 )
 
-# Language options
+# -----------------------------------
+# Language Selection
+# -----------------------------------
+
 language_map = {
     "English": "en",
     "Hindi": "hi"
@@ -61,16 +117,22 @@ language_code = language_map[
     selected_language
 ]
 
-# Audio speed
+# -----------------------------------
+# Audio Speed
+# -----------------------------------
+
 audio_speed = st.slider(
     "Audio Speed",
     min_value=0.5,
     max_value=2.0,
-    value=1.10,
+    value=1.0,
     step=0.1
 )
 
+# -----------------------------------
 # Buttons
+# -----------------------------------
+
 col1, col2 = st.columns(2)
 
 generate_audio_btn = col1.button(
@@ -146,10 +208,13 @@ if generate_audio_btn:
 if generate_video_btn:
 
     # Validation
-    if not uploaded_video:
+    if (
+        not uploaded_video
+        and not selected_gameplay_path
+    ):
 
         st.warning(
-            "Please upload a video"
+            "Please upload or select a video"
         )
 
         st.stop()
@@ -170,11 +235,11 @@ if generate_video_btn:
     try:
 
         # -----------------------------------
-        # Upload Video
+        # Prepare Video
         # -----------------------------------
 
         progress_text.text(
-            "Uploading video..."
+            "Preparing video..."
         )
 
         progress_bar.progress(10)
@@ -184,14 +249,34 @@ if generate_video_btn:
             f"{generate_filename('mp4')}"
         )
 
-        with open(
-            input_video_path,
-            "wb"
-        ) as file:
+        # Save uploaded video
+        if uploaded_video:
 
-            file.write(
-                uploaded_video.read()
-            )
+            with open(
+                input_video_path,
+                "wb"
+            ) as file:
+
+                file.write(
+                    uploaded_video.read()
+                )
+
+        # Copy gameplay video
+        else:
+
+            with open(
+                selected_gameplay_path,
+                "rb"
+            ) as source_file:
+
+                with open(
+                    input_video_path,
+                    "wb"
+                ) as dest_file:
+
+                    dest_file.write(
+                        source_file.read()
+                    )
 
         # -----------------------------------
         # Generate TTS
@@ -312,3 +397,4 @@ if generate_video_btn:
         st.error(
             f"Error: {str(error)}"
         )
+
